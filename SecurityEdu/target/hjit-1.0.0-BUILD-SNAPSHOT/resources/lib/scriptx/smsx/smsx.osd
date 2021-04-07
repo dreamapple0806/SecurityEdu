@@ -1,0 +1,40 @@
+<SOFTPKG NAME="{1663ed61-23eb-11d2-b92f-008048fdd814}" VERSION="6,5,439,50">
+
+  <TITLE>MeadCo ScriptX Advanced</TITLE>
+  <ABSTRACT>ScriptX (c) 1998-2008 by MeadCo &amp; Co Limited, licensed version</ABSTRACT>
+  <LICENSE HREF="http://www.meadroid.com/scriptx/"/>
+  <LANGUAGE VALUE="en"/>
+
+  <MSICD::NATIVECODE>
+
+    <CODE CLASSID="{1663ed61-23eb-11d2-b92f-008048fdd814}" VERSION="6,5,439,50" NAME="MCScripX.dll">
+      <IMPLEMENTATION>
+        <PROCESSOR VALUE="x86"/>
+        <CODEBASE FILENAME="smsx2.inf"/>
+      </IMPLEMENTATION>
+    </CODE>
+
+    <CODE CLASSID="{1663ed6a-23eb-11d2-b92f-008048fdd814}" VERSION="6,5,439,50" NAME="MCPrintX.dll">
+      <IMPLEMENTATION>
+        <PROCESSOR VALUE="x86"/>
+        <CODEBASE FILENAME="smsx2.inf"/>
+      </IMPLEMENTATION>
+    </CODE>
+
+    <CODE CLASSID="{5445be81-b796-11d2-b931-002018654e2e}" VERSION="6,5,439,50" NAME="MCSecMgr.dll">
+      <IMPLEMENTATION>
+        <PROCESSOR VALUE="x86"/>
+        <CODEBASE FILENAME="smsx2.inf"/>
+      </IMPLEMENTATION>
+    </CODE>
+
+    <CODE CLASSID="{C29F168A-7488-42A0-BDA1-47B3578652BE}" VERSION="6,5,439,50" NAME="MCMaxiPT.dll">
+      <IMPLEMENTATION>
+        <PROCESSOR VALUE="x86"/>
+        <CODEBASE FILENAME="smsx2.inf"/>
+      </IMPLEMENTATION>
+    </CODE>
+
+  </MSICD::NATIVECODE>
+
+</SOFTPKG>

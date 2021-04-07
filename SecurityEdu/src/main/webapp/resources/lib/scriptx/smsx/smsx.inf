@@ -1,0 +1,106 @@
+; ========================= MeadCo's ScriptX ========================
+; Copyright (c) 1998-2008, Mead & Company Limited.
+
+[version]
+signature="$CHICAGO$"
+AdvancedINF=2.5,'You need a new version of advpack.dll'
+
+[Add.Code]
+smsx.inf=smsx.inf
+MCScripX.dll=MCScripX.dll
+MCPrintX.dll=MCPrintX.dll
+MCSecMgr.dll=MCSecMgr.dll
+MCMaxiPT.dll=MCMaxiPT.dll
+
+[smsx.inf]
+hook=MAXIPT
+
+[MCScripX.dll]
+clsid={1663ed61-23eb-11d2-b92f-008048fdd814}
+FileVersion=6,5,439,50
+hook=ScriptX
+
+[MCPrintX.dll]
+clsid={1663ed6a-23eb-11d2-b92f-008048fdd814}
+FileVersion=6,5,439,50
+hook=TriPrint
+
+[MCSecMgr.dll]
+clsid={5445be81-b796-11d2-b931-002018654e2e}
+FileVersion=6,5,439,50
+hook=SecMgr
+
+[MCMaxiPT.dll]
+clsid={C29F168A-7488-42A0-BDA1-47B3578652BE}
+FileVersion=6,5,439,50
+hook=PTDll
+
+[MAXIPT]
+InfFile=smsx.inf
+InfSection=WebInstall
+
+[ScriptX]
+InfFile=ScriptX.inf
+InfSection=WebInstall
+
+[TriPrint]
+InfFile=PrintX.inf
+
+[SecMgr]
+InfFile=SecMgr.inf
+
+[PTDll]
+InfFile=pt.inf
+
+; ========================= Win32 INF ========================
+
+[SourceDisksNames]
+1="MeadCo ScriptX","smsx.cab", 0
+
+[SourceDisksFiles]
+smsx.inf=1
+
+[WebInstall]
+RequiredEngine=Setupapi,%SetupApi%
+CustomDestination=CustomDestination
+RequiredEngine=Setupapi,%SetupApi%
+CopyFiles=CopyInfFiles
+
+[DefaultInstall]
+RequiredEngine=Setupapi,%SetupApi%
+CustomDestination=CustomDestination
+RunPostSetupCommands=InstallCommands
+
+[DefaultUninstall]
+RequiredEngine=Setupapi,%SetupApi%
+BeginPrompt=UninstallPrompt
+RunPostSetupCommands=UninstallCommands
+
+[InstallCommands]
+rundll32.exe advpack.dll,LaunchINFSection %49010%\SecMgr.inf,DefaultInstall,1
+rundll32.exe advpack.dll,LaunchINFSection %49010%\PrintX.inf,DefaultInstall,1
+rundll32.exe advpack.dll,LaunchINFSection %49010%\ScriptX.inf,WebInstall,1
+rundll32.exe advpack.dll,LaunchINFSection %49010%\pt.inf,DefaultInstall,1
+
+[UninstallCommands]
+rundll32.exe advpack.dll,LaunchINFSection %17%\ScriptX.inf,DefaultUninstall,1
+rundll32.exe advpack.dll,LaunchINFSection %17%\SecMgr.inf,DefaultUninstall,1
+rundll32.exe advpack.dll,LaunchINFSection %17%\pt.inf,DefaultUninstall,1
+rundll32.exe advpack.dll,DelNodeRunDLL32 %17%\smsx.inf
+
+[CustomDestination]
+49010,49011,49012,49013=SourceDir
+
+[DestinationDirs]
+CopyInfFiles=17
+
+[CopyInfFiles] 
+smsx.inf
+
+[UninstallPrompt]
+Prompt="Are you sure you want to remove the shared binaries, MeadCo's MaxiPT ScriptX and Security Manager?"
+ButtonType=YESNO
+Title="MeadCo's ScriptX Uninstaller"
+
+[Strings]
+SetupApi="This setup program requires Win32 SetupAPI DLLs"
