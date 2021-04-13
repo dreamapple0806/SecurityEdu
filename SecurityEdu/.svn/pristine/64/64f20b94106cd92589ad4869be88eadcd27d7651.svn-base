@@ -1,0 +1,81 @@
+; ========================= MeadCo's SecMgr ========================
+; Copyright (c) 1998-2008, Mead & Co Limited.
+
+[version]
+signature="$CHICAGO$"
+AdvancedINF=2.5,'You need a new version of advpack.dll'
+
+[Add.Code]
+MCSecMgr.dll=MCSecMgr.dll
+
+[MCSecMgr.dll]
+clsid={5445be81-b796-11d2-b931-002018654e2e}
+FileVersion=6,5,439,50
+hook=SecMgr
+
+[SecMgr]
+InfFile=SecMgr.inf
+
+; ========================= Win32 INF ========================
+
+[SourceDisksNames]
+1="MeadCo Security Manager","SecMgr.cab", 0
+
+[SourceDisksFiles]
+MCSecMgr.dll=1
+SecMgr.inf=1
+MCPXHost.exe=1
+MCBroker.exe=1
+
+[DefaultInstall]
+RequiredEngine=Setupapi,%SetupApi%
+CopyFiles=CopyFiles, CopyInfFiles
+RegisterOCXs=RegisterFiles
+UpdateInis=AddLink 
+AddReg=AddRegistry
+
+[DefaultUninstall]
+RequiredEngine=Setupapi,%SetupApi%
+UnRegisterOCXs=RegisterFiles
+DelFiles=CopyFiles, CopyInfFiles
+UpdateInis=RemoveLink
+DelReg=DelRegistry
+
+[DestinationDirs]
+CopyFiles=11
+CopyInfFiles=17
+
+[CopyFiles] 
+MCSecMgr.dll,,,97
+MCSXUser.exe,MCPXHost.exe,,97
+MCBroker.exe,,,97
+
+[CopyInfFiles] 
+SecMgr.inf
+
+[RegisterFiles]
+%11%\MCSecMgr.dll
+
+[AddLink]
+setup.ini, progman.groups,, "group0=%LinksGroup%"
+setup.ini, group0,, """%SecMgr%"",""MCSXUser.exe %11%\MCSecMgr.dll,LicMgr"",""%11%\MCSecMgr.dll"""
+setup.ini, group0,, ""MeadCo License Manager""
+setup.ini, group0,, ""MeadCo Security Manager""
+setup.ini, group0,, ""Security Manager""
+
+[RemoveLink]
+setup.ini, progman.groups,, "group0=%LinksGroup%"
+setup.ini, group0,, ""%SecMgr%""
+
+[Strings]
+LinksGroup="Mead & Company"
+SecMgr="License Manager"
+SetupApi="This setup program requires Win32 SetupAPI DLLs"
+
+[AddRegistry]
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{5445be81-b796-11d2-b931-002018654e2e},,,
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{0F9C8714-F545-4071-8029-ABD623A3EAF6},,,
+
+[DelRegistry]
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{5445be81-b796-11d2-b931-002018654e2e}
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{0F9C8714-F545-4071-8029-ABD623A3EAF6}

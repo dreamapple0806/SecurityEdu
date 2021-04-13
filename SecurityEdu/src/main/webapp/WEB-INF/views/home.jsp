@@ -45,8 +45,7 @@
 </style>
 
 </head>
-<!-- <body oncontextmenu='return false' onselectstart='return false' ondragstart='return false'> -->
-<body>
+<body oncontextmenu='return false' onselectstart='return false' ondragstart='return false'>
 	<%
 		request.setCharacterEncoding("utf-8");	
 		Date d = new Date();	       

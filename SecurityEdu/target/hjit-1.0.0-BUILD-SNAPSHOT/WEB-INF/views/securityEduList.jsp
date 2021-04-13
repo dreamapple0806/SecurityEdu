@@ -3,6 +3,7 @@
 <%@ page import="java.net.URLEncoder"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="java.util.Date"%>
+<%@ page import="java.util.Calendar"%>
 <%@ page import="java.text.SimpleDateFormat"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -37,16 +38,13 @@
 <body>
 	<%
 		Date d = new Date();
-	       
-        String s = d.toString();
-        System.out.println("현재날짜 : "+ s);
-       
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-01");
-        SimpleDateFormat edf = new SimpleDateFormat("yyyy-MM-dd");
-        
-        String symd = sdf.format(d);
+        SimpleDateFormat edf = new SimpleDateFormat("yyyy-MM-dd"); 
         String eymd = edf.format(d);
-        		
+        
+        Calendar cal = Calendar.getInstance();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        cal.add(cal.YEAR, -1); //날짜를 하루 더한다.
+        String symd = sdf.format(cal.getTime());
 	%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./">
@@ -58,7 +56,14 @@
 				<li class="nav-item active"><a class="nav-link" href="./">출입자 교육</a></li>
 				<li class="nav-item active"><a class="nav-link" href="./securityEduList.do">방문자 등록 현황</a></li>
 			</ul>
+		</div>		
+		<form action="./excelDown.do" method="post">
+		<div class="float-right" style="padding-right:5px;">
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-warning my-2 my-sm-0" name="excelDown">엑셀다운</button>
 		</div>
+		<input type="hidden" id="symdToExcel" name="symdToExcel" value="<%=symd %>" />
+		<input type="hidden" id="eymdToExcel" name="eymdToExcel" value="<%=eymd %>" />
+		</form>	 	
 	</nav>
 	<div class="card bg-light mt-4">
 		<div class="card-header bg-light show-grid ">
@@ -72,15 +77,19 @@
 		    			<tbody>
 							<tr class="text-center" style="height:35px;">
 	    	    				<td class="text-center align-middle" style="font-size:12pt; width:15%">
-    	    						검색기간
+    	    						등록자 성명
     	    					</td>
-	    	    				<td class="align-middle" style="width:35%">
+	    	    				<td class="text-center align-middle" style="font-size:12pt; width:30%">
+    	    						<input class="text-center" type="text" name="name" style="width:300px" value="">
+    	    					</td>
+	    	    				<td class="text-center align-middle" style="font-size:12pt; width:15%">
+    	    						등록일자
+    	    					</td>
+	    	    				<td class="text-center align-middle" style="width:35%">
     	    						<input class="text-center" type="date" name="symd" style="width:150px" value="<%=symd %>">
     	    				 		~ <input class="text-center" type="date" name="eymd" style="width:150px" value="<%=eymd %>">
     	    				 		&nbsp;&nbsp;&nbsp;
 	        						<button class="btn btn-sm btn-primary my-2 my-sm-0" name="searchBtn" type="submit">조회</button>
-    	    				 		&nbsp;&nbsp;&nbsp;
-	        						<button class="btn btn-sm btn-warning my-2 my-sm-0" name="excelDown" onclick="excelDown()">엑셀다운</button>
     	    					</td>
       						</tr>
     					</tbody>
@@ -94,7 +103,7 @@
     				<thead>
 	      				<tr class="text-center" style="height:35px;">
         					<th class="align-middle" style="font-size:9pt; width:50px">No</th>
-        					<th class="align-middle" style="font-size:9pt; width:100px">성명</th>
+        					<th class="align-middle" style="font-size:9pt; width:100px">등록자 성명</th>
         					<th class="align-middle" style="font-size:9pt; width:100px">생년월일</th>
         					<th class="align-middle" style="font-size:9pt; width:100px">연락처</th>
         					<th class="align-middle" style="font-size:9pt; width:80px">Email</th>
@@ -107,10 +116,46 @@
       					<c:forEach var="item" items="${list}" varStatus="vs">
 	      				<tr class="text-center" style="height:40px; padding-top: 0px; padding-bottom: 0px">
 	      					<td class="align-middle" style="font-size:9pt; width:50px;">${(vs.index)+1}</td>
-        					<td class="align-middle" style="font-size:9pt; width:100px;">${list[vs.index].edu_name}</td>
-        					<td class="align-middle" style="font-size:9pt; width:100px;" nowrap>${list[vs.index].edu_birth}</td>
-        					<td class="align-middle" style="font-size:9pt; width:100px;">${list[vs.index].edu_phone}</td>
-        					<td class="align-middle" style="font-size:9pt; width:80px;" nowrap>${list[vs.index].edu_mail}</td>
+        					<td class="align-middle" style="font-size:9pt; width:100px;">
+        						<c:set var="name"       value="${list[vs.index].edu_name}" />
+								<c:set var="totalLength" value="${fn:length(name) }" />
+								<c:set var="first"      value="${fn:substring(name, 0, 1) }" />
+								<c:set var="last"      value="${fn:substring(name, 2, totalLength) }" />
+								
+      							<c:forEach begin="0" end="${fn:length(list[vs.index].edu_name)-1}" varStatus="status">
+        							<c:if test="${status.current%2 == 1}">
+        							 	*
+        							</c:if> 
+        							<c:if test="${status.current%2 == 0}">
+        							 	<c:out value="${fn:substring(name, status.current, status.current+1)}" />
+        							</c:if>
+      							</c:forEach>
+								
+							</td>
+        					<td class="align-middle" style="font-size:9pt; width:100px;" nowrap>
+        						${fn:substring(list[vs.index].edu_birth,0,4) }
+      							<!-- 월일에 *를 찍어줌 -->
+      							<c:forEach begin="4" end="${fn:length(list[vs.index].edu_birth)-1}" step="1">
+        						*
+      							</c:forEach>
+      						</td>
+        					<td class="align-middle" style="font-size:9pt; width:100px;">
+        						${fn:substring(list[vs.index].edu_phone,0,3) } - 
+      							<!-- 전화번호 가운데 * 를 찍어줌 -->
+      							<c:forEach begin="4" end="7" step="1">
+        						*
+      							</c:forEach>
+      							-
+      							${fn:substring(list[vs.index].edu_phone,7,11) }
+        					</td>
+        					<td class="align-middle" style="font-size:9pt; width:80px;" nowrap>
+        						<c:set var="email" value="${fn:substring(list[vs.index].edu_mail,0,fn:indexOf(list[vs.index].edu_mail,'@')) }"/>
+        							${fn:substring(fn:substring(list[vs.index].edu_mail,0,fn:indexOf(list[vs.index].edu_mail,'@')),0,3) }
+        						<c:forEach begin="4" end="${fn:length(email)}" step="1">
+        							*
+      							</c:forEach>
+        						@*.*
+        					</td>
         					<td class="align-middle" style="font-size:9pt; width:100px;">${list[vs.index].indate}</td>
         					<td class="align-middle" style="font-size:9pt; width:100px;">${list[vs.index].edu_infochk}</td>
       					</tr>
@@ -147,41 +192,6 @@
 
 	function excelDown(){
 		alert("excelDown");
-    	var d = document.forms[0];
-    	
-		d.target = "_self";
-		d.action.value = "excelDown";
-		d.link.value = "securityEduList";
-		d.submit();
-		
-	}
-	
-	function taxPrintProccess(param1, param2) {
-		var serial = document.getElementById("serial");
-		var opt = document.getElementById("opt");
-		
-		document.getElementById("serial").value = param1;
-		document.getElementById("opt").value = param2;
-		
-		if(document.getElementById("opt").value == 'taxShipper'){
-			var url = "taxPrintProccess.do";
-			window.open("", "taxPrintPopup", "location=no,status=no,toolbar=no,menubar=yes,scrollbars=yes,width=750,height=820,left=10,top=100");
-			document.Form.action = url;
-			document.Form.method = "post";
-			document.Form.target = "taxPrintPopup";
-			document.Form.submit();
-		}
-		if(document.getElementById("opt").value == 'taxBill'){
-			var url = "taxBillPrintProccess.do";
-			window.open("", "taxBillPrintPopup", "location=no,status=no,toolbar=no,menubar=yes,scrollbars=yes,width=750,height=820,left=10,top=100");
-			document.Form.action = url;
-			document.Form.method = "post";
-			document.Form.target = "taxBillPrintPopup";
-			document.Form.submit();
-		}
-        
-        return false;
-		
 	}
 	</script>
 </body>

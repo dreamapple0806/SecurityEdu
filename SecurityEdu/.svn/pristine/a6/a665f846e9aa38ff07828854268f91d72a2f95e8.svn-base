@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="EUC-KR" standalone="no"?>
+
+<project name="hjitERS2" default="clean" basedir=".">
+
+	<!-- JAR 파일 생성을 위한 변수 -->
+	<property name="project.name" value="hjit" />
+	<property name="base.dir" value="." />
+	<property name="src.dir" value="src" />
+	<property name="web.dir" value="target/hjit-1.0.0-BUILD-SNAPSHOT" />
+	<property name="dist.dir" value="dist" />
+
+	<property name="build.dir" value="build" />
+	<property name="war.file" value="${dist.dir}/${project.name}.war" />
+	<property name="jar.file" value="${dist.dir}/${project.name}.jar" />
+	<property name="tomcat.home" value="C:\apache-tomcat-7.0.81" />
+
+	<!-- 톰캣 시작,종료 관련 변수 -->
+	<property name="tomcat.manager.url" value="http://172.16.43.69:8090/manager" />
+	<property name="tomcat.manager.id" value="tomcat" />
+	<property name="tomcat.manager.password" value="tomcat" />
+	<property name="tomcat.path" value="/" />
+	<property name="tomcat.reload.class" value="org.apache.catalina.ant.ReloadTask" />
+
+	<property name="catalina.ant.jar" value="${tomcat.home}/lib/catalina-ant.jar" />
+	<property name="tomcat.start.class" value="org.apache.catalina.ant.StartTask" />
+	<property name="tomcat.stop.class" value="org.apache.catalina.ant.StopTask" />
+
+	<taskdef name="start" classname="${tomcat.start.class}" classpath="${catalina.ant.jar}" />
+	<taskdef name="stop" classname="${tomcat.stop.class}" classpath="${catalina.ant.jar}" />
+
+	<target name="tomcatStart" description="톰캣 시작">
+		<start url="${tomcat.manager.url}/text" username="${tomcat.manager.id}" password="${tomcat.manager.password}" path="${tomcat.path}hjitERS2" />
+	</target>
+
+	<target name="tomcatShutdown" description="톰캣 종료">
+		<stop url="${tomcat.manager.url}/text" username="${tomcat.manager.id}" password="${tomcat.manager.password}" path="${tomcat.path}hjitERS2" />
+	</target>
+
+	<!-- 컴파일 라이브러리 패스 설정 -->
+	<path id="project.classpath">
+		<pathelement path="${web.dir}/WEB-INF/lib" />
+		<fileset dir="${web.dir}/WEB-INF/lib">
+			<include name="*.jar" />
+		</fileset>
+		<pathelement path="C:/apache-tomcat-7.0.81/lib" />
+		<fileset dir="C:/apache-tomcat-7.0.81/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<!-- 빌드 날짜 생성 -->
+	<target name="datentime" description="create current date">
+		<tstamp>
+			<format property="DSTAMP" pattern="yyyy-MM-dd" />
+			<format property="TSTAMP" pattern="HH:mm:ss" />
+		</tstamp>
+		<echo message="Build started at : ${DSTAMP} - ${TSTAMP}" />
+	</target>
+
+	<!-- build, dist 폴더를 삭제하여 프로젝트를 Clean 처리한다.-->
+	<target name="clean" description="delete build, dist">
+		<echo message="dist.dir is ${dist.dir}" />
+		<echo message="build.dir is ${build.dir}" />
+
+		<delete dir="${dist.dir}" />
+		<delete dir="${build.dir}" />
+	</target>
+
+	<!-- build 폴더에 자바 컴파일 후 classes 파일을 복사한다. -->
+	<target name="build" depends="prepare" description="compile java">
+		<echo message="dist.dir is ${src.dir}" />
+		<echo message="build.dir is ${build.dir}" />
+
+		<javac srcdir="${src.dir}" destdir="${build.dir}/WEB-INF/classes" debug="${compile.debug}"
+			deprecation="${compile.deprecation}" optimize="${compile.optimize}" classpathref="project.classpath" includeantruntime="false" encoding ="UTF-8">
+		</javac>
+		<copy todir="${build.dir}/WEB-INF/classes">
+			<fileset dir="${src.dir}" excludes="**/*.java, **/*.properties" />
+		</copy>
+	</target>
+
+	<!-- 빌드하기전에 빌드폴더 생성 및 WebContent?내의 파일을 build 폴더로 복사 -->
+	<target name="prepare" depends="datentime, clean" description="copy web contents">
+		<echo message="build.dir is ${build.dir}" />
+		<echo message="web.dir is ${web.dir}" />
+
+		<mkdir dir="${build.dir}" />
+		<mkdir dir="${build.dir}/WEB-INF" />
+		<mkdir dir="${build.dir}/WEB-INF/classes" />
+		<copy todir="${build.dir}">
+			<fileset dir="${web.dir}" />
+		</copy>
+	</target>
+
+	<!-- build 폴더와 톰캣 app 폴더와 동기화 시킨다. -->
+
+	<target name="apply" depends="build" description="sync between webapp and build ">
+		<echo message="tomcat.home is ${tomcat.home}" />
+		<echo message="project.name is ${project.name}" />
+		<echo message="build.dir is ${build.dir}" />
+
+		<sync todir="${tomcat.home}/webapps/${project.name}">
+			<fileset dir="${build.dir}" />
+		</sync>
+	</target>
+
+	<!-- build 폴더를 프로젝트이름.war로 압축해서 dist 폴더로 -->
+	<target name="dist" depends="build" description="make war file from build to dist">
+		<echo message="dist.dir is ${dist.dir}" />
+		<echo message="war.file is ${war.file}" />
+		<echo message="build.dir is ${build.dir}" />
+
+		<mkdir dir="${dist.dir}" />
+		<echo>
+			${war.file}
+		</echo>
+		<jar destfile="${war.file}" basedir="${build.dir}" />
+	</target>
+
+	<!-- 파일 삭제 -->
+	<target name="warDelete">
+		<delete verbose="true">
+			<fileset dir="C:/apache-tomcat-7.0.81/webapps">
+				<include name="**/*.war" />
+			</fileset>
+		</delete>
+	</target>
+</project>

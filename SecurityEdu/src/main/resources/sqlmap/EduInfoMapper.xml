@@ -20,10 +20,11 @@
     <!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
 	<select id="getList" resultType="visitVO" parameterType="String">
 		SELECT 
-			edu_name, edu_birth, edu_phone, edu_mail, edu_infochk, substr(a.indate, 1, 8) as indate
+			edu_name, edu_birth, edu_phone, edu_mail, edu_infochk, to_char(to_date(a.indate, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD') as indate
 		FROM
 			security_edu_info a
 		WHERE substr(a.indate, 1, 8) between #{symd} and #{eymd}
 			AND a.edu_name like '%' || #{edu_name} || '%'
+		ORDER BY indate DESC
 	</select>
 </mapper>
