@@ -52,6 +52,12 @@
         String s = d.toString();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String eymd = sdf.format(d);
+
+        String mip = "172.16.46.234";
+    	String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null) ip = request.getRemoteAddr();
+        
+        System.out.println("aaa : " + ip);
 	%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./">
@@ -62,7 +68,7 @@
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item active"><a class="nav-link" href="./">출입자 교육</a></li>
 				<%
-				if(true)
+				if(ip.equals(mip))
 				{
 				%>
 				<li class="nav-item active"><a class="nav-link" href="./securityEduList.do">방문자 등록 현황</a></li>

@@ -19,6 +19,11 @@
 <!-- 부트스트랩, 커스텀 css 파일 링크 설정 -->
 <link rel="stylesheet" href="resources/lib/css/bootstrap.min.css">
 <link rel="shortcut icon" href="resources/image/favicon.ico" type="image/x-icon">
+<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
+<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
+<script src="resources/lib/js/popper.js"></script>
+<script src="resources/lib/js/bootstrap.min.js"></script>
+<script src="resources/lib/js/util.js"></script>
 
 <style>
 	@font-face{
@@ -45,6 +50,12 @@
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         cal.add(cal.YEAR, -1); //날짜를 하루 더한다.
         String symd = sdf.format(cal.getTime());
+
+        String mip = "172.16.46.234";
+    	String ip = request.getHeader("X-Forwarded-For");
+        if (ip == null) ip = request.getRemoteAddr();
+        
+        System.out.println("aaa : " + ip);
 	%>
 	<nav class="navbar navbar-expand-lg navbar-light bg-light">
 		<a class="navbar-brand" href="./">
@@ -54,16 +65,23 @@
 		<div id="navbar" class="collapse navbar-collapse float-right">
 			<ul class="navbar-nav mr-auto">
 				<li class="nav-item active"><a class="nav-link" href="./">출입자 교육</a></li>
+				<%
+				if(ip.equals(mip))
+				{
+				%>
 				<li class="nav-item active"><a class="nav-link" href="./securityEduList.do">방문자 등록 현황</a></li>
+				<%
+				}
+				%>
 			</ul>
 		</div>		
 		<form action="./excelDown.do" method="post">
 		<div class="float-right" style="padding-right:5px;">
-		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-warning my-2 my-sm-0" name="excelDown">엑셀다운</button>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button class="btn btn-sm btn-warning my-2 my-sm-0" id="excelDown" name="excelDown">엑셀다운</button>
 		</div>
-		<input type="hidden" id="symdToExcel" name="symdToExcel" value="<%=symd %>" />
-		<input type="hidden" id="eymdToExcel" name="eymdToExcel" value="<%=eymd %>" />
-		<input type="hidden" id="name" name="name" value="" />
+		<input type="hidden" id="symdToExcel" name="symdToExcel" value="" />
+		<input type="hidden" id="eymdToExcel" name="eymdToExcel" value="" />
+		<input type="hidden" id="nameToExcel" name="nameToExcel" value="" />
 		</form>	 	
 	</nav>
 	<div class="card bg-light mt-4">
@@ -87,8 +105,8 @@
     	    						등록일자
     	    					</td>
 	    	    				<td class="text-center align-middle" style="width:35%">
-    	    						<input class="text-center" type="date" name="symd" style="width:150px" value="<%=symd %>">
-    	    				 		~ <input class="text-center" type="date" name="eymd" style="width:150px" value="<%=eymd %>">
+    	    						<input class="text-center" type="date" id="symd" name="symd" style="width:150px" value="<%=symd %>">
+    	    				 		~ <input class="text-center" type="date" id="eymd" name="eymd" style="width:150px" value="<%=eymd %>">
     	    				 		&nbsp;&nbsp;&nbsp;
 	        						<button class="btn btn-sm btn-primary my-2 my-sm-0" name="searchBtn" type="submit">조회</button>
     	    					</td>
@@ -183,17 +201,13 @@
 			</div>	
 		</div>
 	</div>
-	<!-- Jquery, popper, bootstrap 자바스크립트 추가 -->
-	<script src="resources/lib/js/jquery-3.4.1.min.js"></script>
-	<script src="resources/lib/js/popper.js"></script>
-	<script src="resources/lib/js/bootstrap.min.js"></script>
-	<script src="resources/lib/js/util.js"></script>
 	
 	<script>
-
-	function excelDown(){
-		alert("excelDown");
-	}
+	$('#excelDown').on('click', function(){
+		$('#symdToExcel').val($('#symd').val());
+		$('#eymdToExcel').val($('#eymd').val());
+		$('#nameToExcel').val($('#name').val());
+	});
 	</script>
 </body>
 </html>
