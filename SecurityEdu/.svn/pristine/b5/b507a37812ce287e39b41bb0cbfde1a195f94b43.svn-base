@@ -1,0 +1,212 @@
+package kr.co.hjit;
+
+import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Locale;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.ModelAndView;
+
+/**
+ * Handles requests for the application home page.
+ */
+@Controller
+public class HomeController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(HomeController.class);
+
+	@Resource(name = "eduService")
+	private EduDAO eduService;
+	
+	/**
+	 * Simply selects the home view to render by returning its name.
+	 */
+	@RequestMapping(value = "/", method = RequestMethod.GET)
+	public String home(Locale locale, Model model, HttpServletRequest request) {
+		logger.info("Welcome home! The client locale is {}.", locale);
+		
+		Date date = new Date();
+		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale);		
+		String formattedDate = dateFormat.format(date);		
+		model.addAttribute("serverTime", formattedDate);
+		
+		return "home";
+	}
+	
+	@RequestMapping(value = "/eduUserSave.do")
+	@ResponseBody
+	public ModelAndView eduUserSave(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+
+	    String edu_name = (String) request.getParameter("edu_name");
+	    String edu_birth = (String) request.getParameter("edu_birth");
+	    String edu_phone = (String) request.getParameter("edu_phone");
+	    String edu_mail = (String) request.getParameter("edu_mail");
+	    String edu_infoChk = (String) request.getParameter("edu_infoChk");
+	    int strErrMessage = 0;
+	    
+		logger.info("edu_name : " + edu_name + " / edu_birth : " + edu_birth + " / edu_phone : " + edu_phone 
+				+ " / edu_mail : " + edu_mail + " / edu_infoChk : " + edu_infoChk);
+		
+		try {
+    		strErrMessage = eduService.eduInfoRegister(edu_name, edu_birth, edu_phone, edu_mail, edu_infoChk);
+    		logger.info("eduInfoRegister Result : " + strErrMessage);
+
+			if ( strErrMessage != 1 ) {
+				response.setContentType("text/html; charset=UTF-8");				 
+				PrintWriter out = response.getWriter();				 
+				out.println("<script>alert('" + strErrMessage + "');</script>");
+				mav.setViewName("home");
+			}
+			else {
+				response.setContentType("text/html; charset=UTF-8");				 
+				PrintWriter out = response.getWriter();				 
+				out.println("<script>alert('저장이 완료되었습니다.');</script>");	
+				mav.setViewName("home");
+			}
+			return mav;	
+		}
+		catch (Exception e) {
+			mav.setViewName("home");
+			e.printStackTrace();
+			return mav;	
+		}
+	} 
+	
+	@RequestMapping(value = "/eduListSearch.do")
+	@ResponseBody
+	public ModelAndView eduListSearch(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) {
+	    logger.info("eduListSearch.do");
+	    try {
+			 //String name = (String) request.getParameter("name");
+			 String name = (String) request.getParameter("name");
+			 String symd = (String) request.getParameter("symd").replaceAll("-", "");
+			 String eymd = (String) request.getParameter("eymd").replaceAll("-", "");
+
+			 logger.info("name : " + name + " / symd : " + symd + " / eymd : " + eymd);
+			 ArrayList<VisitVO> list = eduService.getList(name, symd, eymd);
+			 
+			 for(int i=0; i<list.size(); i++) {
+				 VisitVO vo = list.get(i);
+			 	logger.info(vo.toString());
+			 } 
+			 
+			 if(list.size() == 0) {
+			 	mav.addObject("message", "조회 결과가 없습니다.");
+			 	mav.setViewName("securityEduList");
+					
+				response.setContentType("text/html; charset=UTF-8");				 
+				PrintWriter out = response.getWriter();				 
+				out.println("<script>alert('조회 결과가 없습니다.'); </script>");				 
+				out.flush();
+			 }
+			 else {
+			  	mav.addObject("list", list);
+			   	mav.setViewName("securityEduList");
+			 }
+			return mav;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return mav;
+		}
+	} 
+	
+	//방문자 등록 현황 메뉴 이동
+	@RequestMapping(value = "/securityEduList.do")
+	public ModelAndView taxProcessList(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+	    logger.info("securityEduList.do");
+
+		HttpSession session =  request.getSession();
+	    String message = "";	
+	    mav.setViewName("securityEduList");
+		
+		return mav;
+	}
+	
+	//방문자 등록현황 엑셀 다운로드
+	@RequestMapping(value = "/excelDown.do")
+	public void excelDown(HttpServletRequest request, HttpServletResponse response, ModelAndView mav) throws Exception {
+	    logger.info("excelDown");
+
+		try {
+		    logger.info("excelDown11111");
+
+			String name = (String) request.getParameter("nameToExcel");
+			String symd = (String) request.getParameter("symdToExcel").replaceAll("-", "");
+			String eymd = (String) request.getParameter("eymdToExcel").replaceAll("-", "");
+
+			List<VisitVO> list = eduService.getList(name, symd, eymd);
+		    
+			Workbook wb = new XSSFWorkbook();
+	        Sheet sheet = wb.createSheet("sheet");
+	        Row row = null;
+	        Cell cell = null;
+	        int rowNum = 0;
+
+	        // Header
+	        row = sheet.createRow(rowNum++);
+	        cell = row.createCell(0);
+	        cell.setCellValue("번호");
+	        cell = row.createCell(1);
+	        cell.setCellValue("성명");
+	        cell = row.createCell(2);
+	        cell.setCellValue("생년월일");
+	        cell = row.createCell(3);
+	        cell.setCellValue("연락처");
+	        cell = row.createCell(4);
+	        cell.setCellValue("Email");
+	        cell = row.createCell(5);
+	        cell.setCellValue("등록일자");
+
+	        // Body
+	        for (int i=0; i<list.size(); i++) {
+	        	VisitVO vo = list.get(i);
+	        	
+	            row = sheet.createRow(rowNum++);
+	            cell = row.createCell(0);
+	            cell.setCellValue(i+1);
+	            cell = row.createCell(1);
+	            cell.setCellValue(vo.getEdu_name());
+	            cell = row.createCell(2);
+	            cell.setCellValue(vo.getEdu_birth());
+	            cell = row.createCell(3);
+	            cell.setCellValue(vo.getEdu_phone());
+	            cell = row.createCell(4);
+	            cell.setCellValue(vo.getEdu_mail());
+	            cell = row.createCell(5);
+	            cell.setCellValue(vo.getIndate());
+	        }
+
+	        // 컨텐츠 타입과 파일명 지정
+	        response.setContentType("ms-vnd/excel");
+	        response.setHeader("Content-Disposition", "attachment;filename=securityList.xlsx");
+
+	        // Excel File Output
+	        wb.write(response.getOutputStream());
+	        wb.close();
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+}

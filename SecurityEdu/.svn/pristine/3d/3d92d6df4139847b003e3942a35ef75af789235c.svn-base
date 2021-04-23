@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 맵핑될 DAO 인터페이스의 Full name 을 줍니다. -->
+<mapper namespace="kr.co.hjit.EduDAO">
+	<!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<insert id="eduInfoRegister" parameterType="string">
+		<selectKey keyProperty="rtn" resultType="java.lang.Integer"> 
+			select 1 from dual
+		</selectKey> 
+	
+        INSERT INTO SECURITY_EDU_INFO
+        	(EDU_NAME, EDU_BIRTH, EDU_PHONE, EDU_MAIL, EDU_INFOCHK, INDATE)
+		VALUES 
+		(
+			#{edu_name}, #{edu_birth}, #{edu_phone}, #{edu_mail}, #{edu_infochk}, TO_CHAR(SYSDATE, 'YYYYMMDDHHMMSS')
+		) 
+    </insert>
+    
+    <!-- id 속성은 DAO 의 메소드와 같아야 한다. 여기의 loginVO 는 mybatis-confg.xml 에 Alias 되어 있습니다. -->
+	<select id="getList" resultType="visitVO" parameterType="String">
+		SELECT 
+			edu_name, edu_birth, edu_phone, edu_mail, edu_infochk, to_char(to_date(a.indate, 'YYYYMMDDHH24MISS'), 'YYYY-MM-DD') as indate
+		FROM
+			security_edu_info a
+		WHERE substr(a.indate, 1, 8) between #{symd} and #{eymd}
+			AND a.edu_name like '%' || #{edu_name} || '%'
+		ORDER BY indate DESC
+	</select>
+</mapper>

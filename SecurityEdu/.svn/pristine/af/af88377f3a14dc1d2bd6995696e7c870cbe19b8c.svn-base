@@ -1,0 +1,61 @@
+; ========================= MeadCo's SecMgr ========================
+; Copyright (c) 1998-2008, Mead & Co Limited.
+
+[version]
+signature="$CHICAGO$"
+AdvancedINF=2.5,'You need a new version of advpack.dll'
+
+[Add.Code]
+MCMaxiPT.dll=MCMaxiPT.dll
+
+[MCMaxiPT.dll]
+clsid={C29F168A-7488-42A0-BDA1-47B3578652BE}
+FileVersion=6,5,439,50
+hook=PT
+
+[PT]
+InfFile=pt.inf
+
+; ========================= Win32 INF ========================
+
+[SourceDisksNames]
+1="MeadCo MaxiPT","maxipt.cab", 0
+
+[SourceDisksFiles]
+MCMaxiPT.dll=1
+pt.inf=1
+
+[DefaultInstall]
+RequiredEngine=Setupapi,%SetupApi%
+CopyFiles=CopyFiles, CopyInfFiles
+RegisterOCXs=RegisterFiles
+AddReg=AddRegistry
+
+[DefaultUninstall]
+RequiredEngine=Setupapi,%SetupApi%
+UnRegisterOCXs=RegisterFiles
+DelFiles=CopyFiles, CopyInfFiles
+DelReg=DelRegistry
+
+[DestinationDirs]
+CopyFiles=11
+CopyInfFiles=17
+
+[CopyFiles] 
+MCMaxiPT.dll,,,97
+
+[CopyInfFiles] 
+pt.inf
+
+[RegisterFiles]
+%11%\MCMaxiPT.dll
+
+[Strings]
+LinksGroup="Mead & Company"
+SetupApi="This setup program requires Win32 SetupAPI DLLs"
+
+[AddRegistry]
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{C29F168A-7488-42A0-BDA1-47B3578652BE},,,
+
+[DelRegistry]
+HKLM,SOFTWARE\Microsoft\Windows\CurrentVersion\Ext\PreApproved\{C29F168A-7488-42A0-BDA1-47B3578652BE}
